@@ -5,6 +5,7 @@ import math
 
 speed_limit = 50
 
+
 def speed_show(image, speed, x1, y1, w1, h1):
     cv2.putText(
         image,
@@ -25,7 +26,7 @@ def warn_show(image, speed, x1, y1, w1, h1):
         cv2.FONT_HERSHEY_SIMPLEX,
         0.75,
         (0, 0, 190),
-        4,
+        3,
     )
     speed_show(image, speed, x1, y1, w1, h1)
 
@@ -35,11 +36,11 @@ def estimateSpeed(location1, location2):
         math.pow(location2[0] - location1[0], 2)
         + math.pow(location2[1] - location1[1], 2)
     )
-    # ppm = location2[2] / carWidht
-    ppm = 8
+    ppm = 16
     d_meters = d_pixels / ppm
-    # fps =
-    speed = d_pixels * 3.6 * 20
+    fps = 10
+    speed = (d_pixels * fps) * 3.6
+    # print(d_pixels)
     return speed
 
 
@@ -57,14 +58,8 @@ def main():
     carCascade = cv2.CascadeClassifier("vech.xml")
     human_cascade = cv2.CascadeClassifier("haarcascade_fullbody.xml")
 
-    video_file_name = "in_crowd.mp4"
+    video_file_name = "video.mp4"
     video = cv2.VideoCapture(video_file_name)
-    # out = cv2.VideoWriter(
-    #     "outNew.avi",
-    #     cv2.VideoWriter_fourcc("M", "J", "P", "G"),
-    #     10,
-    #     video.shape,
-    # )
 
     first = True
     while True:
@@ -72,24 +67,26 @@ def main():
         if type(image) == type(None):
             break
         resultImage = image.copy()
-        humans = human_cascade.detectMultiScale(resultImage, 1.9, 1)
+        humans = human_cascade.detectMultiScale(resultImage, 1.9, 2,None, (15,15))
         if len(humans):
             cv2.putText(
                 resultImage,
                 "HUMAN FOUND",
-                (0, 0),
+                (23,70),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 3,
                 (255, 0, 0),
+                2,
             )
-        else:
+        elif len(humans)==0:
             cv2.putText(
                 resultImage,
-                "HUMAN FOUND",
-                (0, 0),
+                "No Human",
+                (23, 70),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 3,
                 (255, 0, 0),
+                2,
             )
 
         # Display the resulting frame with humans
@@ -109,7 +106,7 @@ def main():
         for carID in carTracker.keys():
             trackingQuality = carTracker[carID].update(image)
 
-            if trackingQuality < 14:
+            if trackingQuality < 7:
                 carIDtoDelete.append(carID)
 
         for carID in carIDtoDelete:
@@ -117,7 +114,7 @@ def main():
             carLocation1.pop(carID, None)
             carLocation2.pop(carID, None)
 
-        if True:
+        if frameCounter%10 == 0:
             grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             cars = carCascade.detectMultiScale(grey, 1.1, 13, 18, (20, 20))
 
@@ -201,10 +198,6 @@ def main():
 
         if cv2.waitKey(1) == ord("q"):
             break
-
-        if first:
-            # time.sleep(6)
-            first = False
 
     cv2.destroyAllWindows()
     # out.release()
