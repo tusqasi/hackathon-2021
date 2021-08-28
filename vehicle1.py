@@ -102,7 +102,7 @@ def main():
 
 
     
-        """comment and comment here"""
+        """uncomment and comment here"""
 
         cv2.imshow("Video Original", frame1)
         # cv2.imshow("grey", grey)
