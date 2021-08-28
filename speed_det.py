@@ -11,7 +11,7 @@ video = cv2.VideoCapture(video_file_name)
 WIDTH = 1280
 HEIGHT = 720
 
-speed_limit = 30
+speed_limit = 30.0
 
 
 def warn_show(image, speed, x1, y1, w1, h1):
@@ -41,9 +41,9 @@ def estimateSpeed(location1, location2):
         + math.pow(location2[1] - location1[1], 2)
     )
     # ppm = location2[2] / carWidht
-    ppm = 8
+    ppm = 4
     d_meters = d_pixels / ppm
-    fps = 29
+    fps = 40
     speed = d_meters * fps * 3.6
     return speed
 
@@ -134,7 +134,11 @@ def trackMultipleObjects():
             t_h = int(trackedPosition.height())
 
             cv2.rectangle(
-                resultImage, (t_x, t_y), (t_x + t_w, t_y + t_h), rectangleColor, 4
+                resultImage,
+                (t_x, t_y),
+                (t_x + t_w, t_y + t_h),
+                rectangleColor,
+                4,
             )
 
             carLocation2[carID] = [t_x, t_y, t_w, t_h]
@@ -155,19 +159,10 @@ def trackMultipleObjects():
                     if (
                         speed[i] == None or speed[i] == 0
                     ):  # and y1 >= 275 and y1 <= 285:
-                        speed[i] = estimateSpeed(
-                            [
-                                x1,
-                                y1,
-                            ],
-                            [
-                                x1,
-                                y2,
-                            ],
-                        )
-
+                        speed[i] = estimateSpeed([x1, y1], [x1, y2])
+                    print(speed)
                     if speed[i] >= speed_limit:
-                        (int(x1 + w1 / 2), int(y1 - 5)),
+                        warn_show(resultImage, speed[i], x1, y1, w1, h1)
                     elif speed[i] != None:
                         cv2.putText(
                             resultImage,
@@ -178,7 +173,7 @@ def trackMultipleObjects():
                             (0, 0, 100),
                             2,
                         )
-        cv2.imshow("result", resultImage)
+        # cv2.imshow("result", resultImage)
 
         # out.write(resultImage)
 
