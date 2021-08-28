@@ -10,9 +10,9 @@ def get_center(x, y, width, height):
 def set_info(detec):
     global counter
     for (x, y) in detec:
-        if (point1 + offset) > y > (point1 - offset):
+        if (pt1 + offset) > y > (pt1 - offset):
             counter += 1
-            cv2.line(frame1, (25, point1), (1200, point1), (0, 127, 255), 3)
+            cv2.line(frame1, (25, pt1), (1200, pt1), (0, 127, 255), 3)
             detec.remove((x, y))
             print("counting the number of car: " + str(counter))
 
@@ -32,22 +32,18 @@ def show_info(frame1, dilatada):
     cv2.imshow("Detectar", dilatada)
 
 
-global counter
-counter = 0
-
-
 def main():
 
     # constants
-    width_min = 80
-    height_min = 80
+    w_min = 80
+    h_min = 80
     offset = 6
-    point1 = 550
+    pt1 = 550
     delay = 60
-    detec = []
+    detect = []
     old_detec = []
-    positions = []
-    counter = caminhoes = 0
+    pos = []
+    counter = 0
 
     cap = cv2.VideoCapture("video.mp4")
     knn_bg_sub = cv2.createBackgroundSubtractorKNN()
@@ -88,17 +84,17 @@ def main():
         # cv2.line(frame1, (25, point1), (1200, point1), (255, 127, 0), 3)
         for (i, c) in enumerate(contours_knn):
             (x, y, w, h) = cv2.boundingRect(c)
-            validar_contours = (w >= width_min) and (h >= height_min)
+            validar_contours = (w >= w_min) and (h >= h_min)
             if not validar_contours:
                 continue
 
             # cv2.rectangle(frame1, (x, y), (x + w, y + h), (0, 255, 0), 2)
             center = get_center(x, y, w, h)
-            detec.append(center)
+            detect.append(center)
             cv2.circle(frame1, center, 4, (0, 0, 255), 13)
         # """
 
-        for (i, cord) in enumerate(zip(detec, old_detec)):
+        for (i, cord) in enumerate(zip(detect, old_detec)):
             # diff_x = abs(cord[0]-cord[1])
             # diff_y = abs(cord[0][1]-cord[1][1])
             print(cord)
