@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 from time import sleep
-from constantes import *
 
 
 def get_center(x, y, width, height):
@@ -38,35 +37,52 @@ counter = 0
 
 
 def main():
+
+    # constants
+    width_min = 80
+    height_min = 80
+    offset = 6
+    point1 = 550
+    delay = 60
+    detec = []
+    old_detec = []
+    positions = []
     counter = caminhoes = 0
+
     cap = cv2.VideoCapture("video.mp4")
     knn_bg_sub = cv2.createBackgroundSubtractorKNN()
-    mog2_bg_sub = cv2.createBackgroundSubtractorMOG2()
+
     while True:
+
         ret, frame1 = cap.read()
-
         tempo = float(1 / delay)
-        sleep(3.0)
-
+        sleep(tempo)
         grey = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
-        blur = cv2.GaussianBlur(grey, (3,) * 2, 5)
+        blur = cv2.GaussianBlur(grey, (9,) * 2, 5)
 
         img_knn_sub = knn_bg_sub.apply(blur)
 
         dilate_matrix = np.ones((3,) * 2)
-        dilat_knn = cv2.dilate(img_knn_sub, dilate_matrix)
+        # dilat_knn = cv2.dilate(img_knn_sub, dilate_matrix)
+
+        # erode_knn = cv2.erode(img_knn_sub, dilate_matrix)
 
         kernel = cv2.getStructuringElement(
             cv2.MORPH_ELLIPSE,
-            (3,) * 2,
+            (7,) * 2,
         )
-        dilatada_knn = cv2.morphologyEx(dilat_knn, cv2.MORPH_CLOSE, kernel)
-        dilatada_knn = cv2.morphologyEx(dilatada_knn, cv2.MORPH_CLOSE, kernel)
+        # dilatada_knn = cv2.morphologyEx(erode_knn, cv2.MORPH_CLOSE, kernel)
+        # dilatada_knn = cv2.morphologyEx(dilatada_knn, cv2.MORPH_CLOSE, kernel)
+        dilatada_knn = cv2.morphologyEx(img_knn_sub, cv2.MORPH_OPEN, kernel)
+        # blur_dilate = cv2.GaussianBlur(dilatada_knn, (9,) * 2, 5)
 
-        contours_knn, img_knn = cv2.findContours(
+        # erode
+        # erodedata_knn = cv2.morphologyEx(erode_knn, cv2.MORPH_CLOSE, kernel)
+        # erodedata_knn = cv2.morphologyEx(erodedata_knn, cv2.MORPH_CLOSE, kernel)
+
+        contours_knn, erode = cv2.findContours(
             dilatada_knn, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
         )
-        print(contours_knn)
 
         # """
         # cv2.line(frame1, (25, point1), (1200, point1), (255, 127, 0), 3)
@@ -76,22 +92,31 @@ def main():
             if not validar_contours:
                 continue
 
-            cv2.rectangle(frame1, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            # cv2.rectangle(frame1, (x, y), (x + w, y + h), (0, 255, 0), 2)
             center = get_center(x, y, w, h)
             detec.append(center)
-            cv2.circle(frame1, center, 4, (0, 0, 255), -1)
+            cv2.circle(frame1, center, 4, (0, 0, 255), 13)
         # """
+
+        for (i, cord) in enumerate(zip(detec, old_detec)):
+            # diff_x = abs(cord[0]-cord[1])
+            # diff_y = abs(cord[0][1]-cord[1][1])
+            print(cord)
+            # print(diff_y, diff_x)
+
+        print("-" * 10)
 
         # set_info(detec)
         # show_info(frame1, frame1)
 
         # cv2.imshow("Video Original", frame1)
         # cv2.imshow("grey", grey)
-        # cv2.imshow("knn_dilata", dilatada_knn)
+        # cv2.imshow("dilate", dilatada_knn)
+        # cv2.imshow("erode", erode_knn)
         # cv2.imshow("blur", blur)
         # cv2.imshow("img_knn_sub", img_knn_sub)
 
-        if cv2.waitKey(1) == ord("q"):
+        if cv2.waitKey(1) in [ord("q"), 27, 13]:
             break
 
     cv2.destroyAllWindows()
