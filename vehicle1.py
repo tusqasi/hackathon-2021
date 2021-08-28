@@ -65,16 +65,10 @@ def main():
 
         kernel = cv2.getStructuringElement(
             cv2.MORPH_ELLIPSE,
-            (7,) * 2,
+            (6,) * 2,
         )
-        # dilatada_knn = cv2.morphologyEx(erode_knn, cv2.MORPH_CLOSE, kernel)
-        # dilatada_knn = cv2.morphologyEx(dilatada_knn, cv2.MORPH_CLOSE, kernel)
-        dilatada_knn = cv2.morphologyEx(img_knn_sub, cv2.MORPH_OPEN, kernel)
-        # blur_dilate = cv2.GaussianBlur(dilatada_knn, (9,) * 2, 5)
 
-        # erode
-        # erodedata_knn = cv2.morphologyEx(erode_knn, cv2.MORPH_CLOSE, kernel)
-        # erodedata_knn = cv2.morphologyEx(erodedata_knn, cv2.MORPH_CLOSE, kernel)
+        dilatada_knn = cv2.morphologyEx(img_knn_sub, cv2.MORPH_OPEN, kernel)
 
         contours_knn, erode = cv2.findContours(
             dilatada_knn, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE
@@ -97,15 +91,20 @@ def main():
         for (i, cord) in enumerate(zip(detect, old_detec)):
             # diff_x = abs(cord[0]-cord[1])
             # diff_y = abs(cord[0][1]-cord[1][1])
-            print(cord)
+            # print(cord)
             # print(diff_y, diff_x)
+            ...
 
-        print("-" * 10)
+        # print("-" * 10)
 
         # set_info(detec)
         # show_info(frame1, frame1)
 
-        # cv2.imshow("Video Original", frame1)
+
+    
+        """comment and comment here"""
+
+        cv2.imshow("Video Original", frame1)
         # cv2.imshow("grey", grey)
         # cv2.imshow("dilate", dilatada_knn)
         # cv2.imshow("erode", erode_knn)
