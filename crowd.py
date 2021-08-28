@@ -1,10 +1,10 @@
 import cv2
-
-cap = cv2.VideoCapture('in.avi')
+from time import sleep
+cap = cv2.VideoCapture('test.py')
 
 
 human_cascade = cv2.CascadeClassifier('haarcascade_fullbody.xml')
-
+cap = cv2.VideoCapture("in_crowd.avi")
 
 while(True):
     # Capture frame-by-frame
@@ -23,6 +23,7 @@ while(True):
     cv2.imshow('frame',frame)
     if cv2.waitKey(1) in [ord('q'),27,13]:
         break
+    sleep(1/10)
 
 # When everything done, release the capture
 cap.release()

@@ -3,36 +3,31 @@ import dlib
 import time
 import math
 
+speed_limit = 50
 
-carCascade = cv2.CascadeClassifier("vech.xml")
-video_file_name = "video.mp4"
-video = cv2.VideoCapture(video_file_name)
-
-WIDTH = 1280
-HEIGHT = 720
-
-speed_limit = 30.0
-
-
-def warn_show(image, speed, x1, y1, w1, h1):
-    cv2.putText(
-        image,
-        f"WARNING",
-        (int(x1 + w1 / 2), int(y1 - 15)),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        0.75,
-        (0, 0, 100),
-        4,
-    )
+def speed_show(image, speed, x1, y1, w1, h1):
     cv2.putText(
         image,
         f"{speed} km/h",
         (int(x1 + w1 / 2), int(y1 - 5)),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.75,
-        (0, 0, 100),
+        (0, 100, 0),
         2,
     )
+
+
+def warn_show(image, speed, x1, y1, w1, h1):
+    cv2.putText(
+        image,
+        f"WARNING",
+        (int(x1 + w1 / 2), int(y1 - 35)),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.75,
+        (0, 0, 190),
+        4,
+    )
+    speed_show(image, speed, x1, y1, w1, h1)
 
 
 def estimateSpeed(location1, location2):
@@ -41,50 +36,90 @@ def estimateSpeed(location1, location2):
         + math.pow(location2[1] - location1[1], 2)
     )
     # ppm = location2[2] / carWidht
-    ppm = 4
+    ppm = 8
     d_meters = d_pixels / ppm
-    fps = 40
-    speed = d_meters * fps * 3.6
+    # fps =
+    speed = d_pixels * 3.6 * 20
     return speed
 
 
-def trackMultipleObjects():
+def main():
     rectangleColor = (0, 255, 0)
     frameCounter = 0
     currentCarID = 0
-    fps = 0
 
     carTracker = {}
     carNumbers = {}
     carLocation1 = {}
     carLocation2 = {}
-    speed = [None] * 100
+    speed = [None] * 1000
 
+    carCascade = cv2.CascadeClassifier("vech.xml")
+    human_cascade = cv2.CascadeClassifier("haarcascade_fullbody.xml")
+
+    video_file_name = "in_crowd.mp4"
+    video = cv2.VideoCapture(video_file_name)
+    # out = cv2.VideoWriter(
+    #     "outNew.avi",
+    #     cv2.VideoWriter_fourcc("M", "J", "P", "G"),
+    #     10,
+    #     video.shape,
+    # )
+
+    first = True
     while True:
-        start_time = time.time()
         rc, image = video.read()
         if type(image) == type(None):
             break
         resultImage = image.copy()
+        humans = human_cascade.detectMultiScale(resultImage, 1.9, 1)
+        if len(humans):
+            cv2.putText(
+                resultImage,
+                "HUMAN FOUND",
+                (0, 0),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                3,
+                (255, 0, 0),
+            )
+        else:
+            cv2.putText(
+                resultImage,
+                "HUMAN FOUND",
+                (0, 0),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                3,
+                (255, 0, 0),
+            )
+
+        # Display the resulting frame with humans
+        for (x, y, w, h) in humans:
+            cv2.rectangle(
+                resultImage,
+                (x, y),
+                (x + w, y + h),
+                (255, 0, 0),
+                2,
+            )
 
         frameCounter = frameCounter + 1
+
         carIDtoDelete = []
 
         for carID in carTracker.keys():
             trackingQuality = carTracker[carID].update(image)
 
-            if trackingQuality < 7:
+            if trackingQuality < 14:
                 carIDtoDelete.append(carID)
 
         for carID in carIDtoDelete:
-
             carTracker.pop(carID, None)
             carLocation1.pop(carID, None)
             carLocation2.pop(carID, None)
 
-        if not (frameCounter % 10):
-            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            cars = carCascade.detectMultiScale(gray, 1.1, 13, 18, (24, 24))
+        if True:
+            grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            cars = carCascade.detectMultiScale(grey, 1.1, 13, 18, (20, 20))
 
             for (_x, _y, _w, _h) in cars:
                 x = int(_x)
@@ -143,11 +178,6 @@ def trackMultipleObjects():
 
             carLocation2[carID] = [t_x, t_y, t_w, t_h]
 
-        end_time = time.time()
-
-        if not (end_time == start_time):
-            fps = 1 / (end_time - start_time)
-
         for i in carLocation1.keys():
             if frameCounter % 1 == 0:
                 [x1, y1, w1, h1] = carLocation1[i]
@@ -156,33 +186,29 @@ def trackMultipleObjects():
                 carLocation1[i] = [x2, y2, w2, h2]
 
                 if [x1, y1, w1, h1] != [x2, y2, w2, h2]:
-                    if (
-                        speed[i] == None or speed[i] == 0
-                    ):  # and y1 >= 275 and y1 <= 285:
+                    if speed[i] == None or speed[i] == 0:
                         speed[i] = estimateSpeed([x1, y1], [x1, y2])
-                    print(speed)
+                        continue
+
                     if speed[i] >= speed_limit:
                         warn_show(resultImage, speed[i], x1, y1, w1, h1)
                     elif speed[i] != None:
-                        cv2.putText(
-                            resultImage,
-                            str(int(speed[i])) + "km/h",
-                            (int(x1 + w1 / 2), int(y1 - 5)),
-                            cv2.FONT_HERSHEY_SIMPLEX,
-                            0.75,
-                            (0, 0, 100),
-                            2,
-                        )
-        # cv2.imshow("result", resultImage)
+                        speed_show(resultImage, speed[i], x1, y1, w1, h1)
+
+        cv2.imshow("result", resultImage)
 
         # out.write(resultImage)
 
         if cv2.waitKey(1) == ord("q"):
             break
 
+        if first:
+            # time.sleep(6)
+            first = False
+
     cv2.destroyAllWindows()
     # out.release()
 
 
 if __name__ == "__main__":
-    trackMultipleObjects()
+    main()
