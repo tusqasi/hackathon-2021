@@ -189,6 +189,7 @@ def main():
 
                     if speed[i] >= speed_limit:
                         warn_show(resultImage, speed[i], x1, y1, w1, h1)
+                        print(f"WARNING overspeeding: {speed[i]}")
                     elif speed[i] != None:
                         speed_show(resultImage, speed[i], x1, y1, w1, h1)
 
