@@ -1,5 +1,7 @@
 # TEAM Hackerz Prototype for TECHNOVATION hackathon
 
+![python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white) ![opencv](https://img.shields.io/badge/opencv-377600?style=for-the-badge&logo=opencv&logoColor=white)
+
 This the prototype of a basic road and traffic safety.  
 
 This prototype uses multiple haar cascade classifier to detect different entities in the frame.
