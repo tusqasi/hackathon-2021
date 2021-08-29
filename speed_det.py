@@ -7,6 +7,7 @@ speed_limit = 50
 
 
 def speed_show(image, speed, x1, y1, w1, h1):
+    """Shows speed of vehicle"""
     cv2.putText(
         image,
         f"{speed} km/h",
@@ -19,6 +20,7 @@ def speed_show(image, speed, x1, y1, w1, h1):
 
 
 def warn_show(image, speed, x1, y1, w1, h1):
+    """Warns of overspeeding"""
     cv2.putText(
         image,
         f"WARNING",
@@ -32,6 +34,7 @@ def warn_show(image, speed, x1, y1, w1, h1):
 
 
 def estimateSpeed(location1, location2):
+    """Estimates speed on pixel distance"""
     d_pixels = math.sqrt(
         math.pow(location2[0] - location1[0], 2)
         + math.pow(location2[1] - location1[1], 2)
@@ -45,6 +48,7 @@ def estimateSpeed(location1, location2):
 
 
 def main():
+    # constants used in code
     rectangleColor = (0, 255, 0)
     frameCounter = 0
     currentCarID = 0
@@ -58,7 +62,7 @@ def main():
     carCascade = cv2.CascadeClassifier("cascades/vech.xml")
     human_cascade = cv2.CascadeClassifier("cascades/haarcascade_fullbody.xml")
 
-    video_file_name = "videos/highway.mp4"
+    video_file_name = "videos/vehicle_example_1.mp4"
     video = cv2.VideoCapture(video_file_name)
 
     first = True
@@ -67,18 +71,19 @@ def main():
         if type(image) == type(None):
             break
         resultImage = image.copy()
-        humans = human_cascade.detectMultiScale(resultImage, 1.9, 2,None, (15,15))
+        humans = human_cascade.detectMultiScale(resultImage, 1.9, 2, None, (15, 15))
+        # warns when humans are found in frame
         if len(humans):
             cv2.putText(
                 resultImage,
                 "HUMAN FOUND",
-                (23,70),
+                (23, 70),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 3,
                 (255, 0, 0),
                 2,
             )
-        elif len(humans)==0:
+        elif len(humans) == 0:
             cv2.putText(
                 resultImage,
                 "No Human",
@@ -108,14 +113,16 @@ def main():
 
             if trackingQuality < 7:
                 carIDtoDelete.append(carID)
-
+        # remove cars with low quality tracking
         for carID in carIDtoDelete:
             carTracker.pop(carID, None)
             carLocation1.pop(carID, None)
             carLocation2.pop(carID, None)
 
-        if frameCounter%10 == 0:
+        # run only on 10th frame
+        if frameCounter % 10 == 0:
             grey = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            # find cars in frame
             cars = carCascade.detectMultiScale(grey, 1.1, 13, 18, (20, 20))
 
             for (_x, _y, _w, _h) in cars:
@@ -149,6 +156,7 @@ def main():
                         matchCarID = carID
 
                 if matchCarID is None:
+                    # track the found cars
                     tracker = dlib.correlation_tracker()
                     tracker.start_track(image, dlib.rectangle(x, y, x + w, y + h))
 
@@ -175,6 +183,8 @@ def main():
 
             carLocation2[carID] = [t_x, t_y, t_w, t_h]
 
+        # last location and current location of car is now
+        # known to find pixle distance and then find speed
         for i in carLocation1.keys():
             if frameCounter % 1 == 0:
                 [x1, y1, w1, h1] = carLocation1[i]
@@ -195,13 +205,10 @@ def main():
 
         cv2.imshow("result", resultImage)
 
-        # out.write(resultImage)
-
         if cv2.waitKey(1) == ord("q"):
             break
 
     cv2.destroyAllWindows()
-    # out.release()
 
 
 if __name__ == "__main__":
