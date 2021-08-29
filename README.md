@@ -36,6 +36,8 @@ Just run
 python speed_det.py
 ```
 
+To exit press q, Escape or Enter while focused on the window.
+
 ## Flowchart
 
 ![Flowchart](https://raw.githubusercontent.com/tusqasi/hackathon-2021/master/Flowchart.png)
