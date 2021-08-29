@@ -25,7 +25,7 @@ Now install the dependencies
 ```md
 python -m venv .env
 pip install -r requirements.txt
-
+```
 
 ## Usage
 
