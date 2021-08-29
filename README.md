@@ -33,3 +33,7 @@ Just run
 ```md
 python speed_det.py
 ```
+
+## Flowchart
+
+![Flowchart](https://raw.githubusercontent.com/tusqasi/hackathon-2021/master/Flowchart.png)
