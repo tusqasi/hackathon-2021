@@ -55,10 +55,10 @@ def main():
     carLocation2 = {}
     speed = [None] * 1000
 
-    carCascade = cv2.CascadeClassifier("vech.xml")
-    human_cascade = cv2.CascadeClassifier("haarcascade_fullbody.xml")
+    carCascade = cv2.CascadeClassifier("cascades/vech.xml")
+    human_cascade = cv2.CascadeClassifier("cascades/haarcascade_fullbody.xml")
 
-    video_file_name = "video.mp4"
+    video_file_name = "videos/highway.mp4"
     video = cv2.VideoCapture(video_file_name)
 
     first = True
